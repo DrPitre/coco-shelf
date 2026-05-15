@@ -1,4 +1,5 @@
-done-*
+*.done
+*.got
 RCS
 *,v
 .*.un~
@@ -8,8 +9,7 @@ go.work
 .cache/
 bin/
 nitros9/
-build-frobio/
-build-gcc-4.6.4/
+build-*/
 cmoc/
 frobio/
 gccretro/
@@ -22,6 +22,15 @@ nitros9/
 share/
 toolshed/
 whippets/
+eou-*09/
+FoenixMgr/
+copico-bonobo/
+gomar/
+nekotos/
+pico-sdk/
+picotool/
+tfr9/
+turbos/
 
 inputs/
 
