@@ -3,7 +3,6 @@
 #        https://github.com/strickyak/coco-shelf
 #
 # The coco-shelf helps you build packages associated with Nitros9
-# (especially strick's frobio networking packages)
 # in a standard and (mostly) repeatable way on modern Linux machines.
 
 # You can edit version numbers in here, to upgrade to newer packages:
@@ -22,7 +21,7 @@ CREATE_GO_WORK = set -x; \
 
 PICO_ENV = PICO_EXAMPLES_PATH=/dev/null PICO_SDK_PATH=$S/pico-sdk
 
-all: all-fetches frobio.done FoenixMgr.done whippets.done copico-bonobo.done
+all: all-fetches frobio.done FoenixMgr.done whippets.done copico-bonobo.done cmoc_os9.done
 
 go.work: _FORCE_
 	$(CREATE_GO_WORK)
@@ -92,16 +91,19 @@ gccretro.got: inputs/$(COCO_GCCRETRO_TARBALL) lwtools.done inputs/gcc-config-gue
 	date > $@
 
 pico-sdk.got: inputs/$(COCO_PICOSDK_TARBALL)
-	set -x; test -d pico-sdk || { tar -xzf inputs/$(COCO_PICOSDK_TARBALL) ; }
+	set -x; test -d pico-sdk || { tar -xjf inputs/$(COCO_PICOSDK_TARBALL) && mv -v $$(basename $(COCO_PICOSDK_TARBALL) .tar.bz2) pico-sdk ; }
 	date > "$@"
 
 picotool.got: inputs/$(COCO_PICOTOOL_TARBALL)
-	set -x; test -d picotool || { tar -xzf inputs/$(COCO_PICOTOOL_TARBALL) ; }
+	set -x; test -d picotool || { tar -xjf inputs/$(COCO_PICOTOOL_TARBALL) && mv -v $$(basename $(COCO_PICOTOOL_TARBALL) .tar.bz2) picotool ; }
 	date > "$@"
 
 ############################################################################
 
-tfr9.done: tfr9.got lwtools.done nitros9.done turbos.done pico-sdk.got
+N9DONE = nitros9.done nitros9-languages.done nitros9-apps.done nitros9-games.done
+N9GOT = nitros9.got nitros9-languages.got nitros9-apps.got nitros9-games.got
+
+tfr9.done: tfr9.got lwtools.done $(N9DONE) turbos.done pico-sdk.got
 	make -C tfr9/v3
 	date > "$@"
 
@@ -149,14 +151,14 @@ else
 	make -C whippets clean
 endif
 
-frobio.done: frobio.got cmoc.done nitros9.done gccretro.done all-eou.got nekotos.got
+frobio.done: frobio.got cmoc.done $(N9DONE) gccretro.done all-eou.got nekotos.got
 	ln -sfv m6809-unknown-$(COCO_GCCRETRO_VERSION) bin/gcc6809
 	mkdir -p build-frobio
 	cd build-frobio && ../frobio/frob3/configure --nitros9="$(SHELF)/nitros9"
 	make -C build-frobio
 	date > frobio.done
 
-FoenixMgr.done: FoenixMgr.got nitros9.done
+FoenixMgr.done: FoenixMgr.got $(N9DONE)
 	echo 'set -x; python3 "$$@"' > bin/python && chmod +x bin/python
 	set -x; for x in FoenixMgr/tools/sh/*; do y=$$(basename $$x); ( sh gen-sh-prelude.sh ; cat $$x ) >bin/$$y; chmod +x bin/$$y; done
 	date > FoenixMgr.done
@@ -166,20 +168,37 @@ toolshed.done: toolshed.got lwtools.done
 	chmod +x bin/md5
 	make -C toolshed -C build/unix DESTDIR="$$SHELF" all
 	make -C toolshed -C build/unix DESTDIR="$$SHELF" install
-	( cd bin && ln -sfv ../usr/bin/* . )
+	( cd bin && for x in `find ../usr/bin/ ../usr/local/bin/ -type f -print` ; do ln -sfv "$$x" .; done )
 	make -C toolshed -C cocoroms DESTDIR="$$SHELF"
 	make -C toolshed -C hdbdos DESTDIR="$$SHELF"
 	date > toolshed.done
 
-nitros9.done: nitros9.got toolshed.done lwtools.done
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 -C lib
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco1 dsk
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco1_6309 dsk
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco3 dsk
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco3_6309 dsk
-	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=wildbits dsk
+nitros9-languages.done: $(N9GOT) toolshed.done lwtools.done
+	:
+
+nitros9-apps.done: $(N9GOT) toolshed.done lwtools.done
+	:
+
+nitros9-games.done: $(N9GOT) toolshed.done lwtools.done
+	:
+
+nitros9.done: $(N9GOT) toolshed.done lwtools.done
+	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/coco/floppy/
+	NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/coco3/floppy/
 	date > nitros9.done
-	#NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 -C level1/wildbits/feu
+	#new# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/wildbits/l1
+	#new# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/wildbits/l2
+	#new# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/wildbits/l1dw
+	#new# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/wildbits/l2dw
+	#new# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9/recipes/wildbits/feu
+	#
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 -C lib
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco1 dsk
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco1_6309 dsk
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco3 dsk
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=coco3_6309 dsk
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 PORTS=wildbits dsk
+	#OLD# NITROS9DIR=$(SHELF)/nitros9 make -C nitros9 -C level1/wildbits/feu
 
 lwtools.done: lwtools.got
 	make -C lwtools PREFIX="$(SHELF)" all
@@ -196,6 +215,10 @@ cmoc.done: cmoc.got lwtools.done
 	make -C cmoc PREFIX="$(SHELF)" all
 	make -C cmoc PREFIX="$(SHELF)" install
 	date > cmoc.done
+
+cmoc_os9.done: cmoc_os9.got cmoc.done lwtools.done
+	make -C cmoc_os9 libs
+	date > cmoc_os9.done
 
 gccretro.done: gccretro.got lwtools.done
 	echo PATH -- $$PATH -- PATH
@@ -234,6 +257,9 @@ all-gits: \
   FoenixMgr.got \
   toolshed.got \
   nitros9.got \
+  nitros9-languages.got \
+  nitros9-apps.got \
+  nitros9-games.got \
   gomar.got \
   whippets.got \
   frobio.got \
@@ -245,6 +271,7 @@ all-gits: \
   fujinet-apps.got  fujinet-config.got  fujinet-firmware.got  fujinet-hardware.got  \
   fujinet-lib.got  fujinet-pc.got  fujinet-platformio.got  spectranet.got   \
   atari800.got \
+  cmoc_os9.got \
   ##
 
 FoenixMgr.got:
@@ -255,6 +282,15 @@ toolshed.got:
 	date > $@
 nitros9.got:
 	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_NITROS9_REPO) $$B
+	date > $@
+nitros9-languages.got:
+	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_NITROS9_LANGUAGES_REPO) $$B
+	date > $@
+nitros9-apps.got:
+	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_NITROS9_APPS_REPO) $$B
+	date > $@
+nitros9-games.got:
+	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_NITROS9_GAMES_REPO) $$B
 	date > $@
 gomar.got:
 	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_GOMAR_REPO) $$B
@@ -329,6 +365,9 @@ spectranet.got:
 atari800.got:
 	B=$(basename $@); set -x; test -d $$B || git clone $(FUJINET_ATARI800_REPO) $$B
 	date > $@
+cmoc_os9.got:
+	B=$(basename $@); set -x; test -d $$B || git clone $(COCO_CMOC_OS9_REPO) $$B
+	date > $@
 
 
 ############################################################################
@@ -395,10 +434,12 @@ inputs/eou-101-m6809.zip:
 clean-shelf:
 	rm -rf build-* done-* *.got *.done go.work
 	rm -rf bin share lib libexec usr include .cache
-	rm -rf cmoc frobio gccretro lwtools m6809-unknown nitros9 toolshed FoenixMgr
+	rm -rf cmoc frobio gccretro lwtools m6809-unknown toolshed FoenixMgr
+	rm -rf nitros9 nitros9-languages nitros9-apps nitros9-games
 	rm -rf eou-*h6309 eou-*m6809 gomar whippets
 	rm -rf nekotos copico-bonobo pico-sdk picotool
-	rm -rf tfr9 turbos
+	rm -rf tfr9 turbos cmoc_os9
+	rm -rf .config copico-centipede fujinet-* spectranet collatz borges-saver atari800
 	##
 
 _FORCE_:

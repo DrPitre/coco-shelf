@@ -3,12 +3,12 @@
 # You can edit version numbers to upgrade packages.
 
 S:=$(shell pwd)
-P:=$(shell echo $$PATH)
+OLD_PATH:=$(shell echo $$PATH)
 export SHELF:=$S
 # Putting this 1st seems to make PATH work.
 export SHELL:=/bin/bash
 # Add coco-shelf/bin at front of PATH.
-export PATH:=$S/bin:$P
+export PATH:=$S/bin:$(OLD_PATH)
 
 PIZGA_MIRROR_URL:=http://pizga.net/inputs
 
@@ -36,6 +36,9 @@ endif
 COCO_FOENIXMGR_REPO:=$(REPO_PREFIX)pweingar/FoenixMgr$(REPO_SUFFIX)
 COCO_TOOLSHED_REPO:=$(REPO_PREFIX)nitros9project/toolshed$(REPO_SUFFIX)
 COCO_NITROS9_REPO:=$(REPO_PREFIX)nitros9project/nitros9$(REPO_SUFFIX)
+COCO_NITROS9_LANGUAGES_REPO:=$(REPO_PREFIX)nitros9project/nitros9-languages$(REPO_SUFFIX)
+COCO_NITROS9_APPS_REPO:=$(REPO_PREFIX)nitros9project/nitros9-apps$(REPO_SUFFIX)
+COCO_NITROS9_GAMES_REPO:=$(REPO_PREFIX)nitros9project/nitros9-games$(REPO_SUFFIX)
 COCO_FROBIO_REPO:=$(REPO_PREFIX)strickyak/frobio$(REPO_SUFFIX)
 COCO_GOMAR_REPO:=$(REPO_PREFIX)strickyak/gomar$(REPO_SUFFIX)
 COCO_WHIPPETS_REPO:=$(REPO_PREFIX)strickyak/whippets$(REPO_SUFFIX)
@@ -45,6 +48,7 @@ COCO_CENTIPEDE_REPO:=$(REPO_PREFIX)strickyak/copico-centipede$(REPO_SUFFIX)
 COCO_GODOCLIENT_REPO:=$(REPO_PREFIX)strickyak/godo-client$(REPO_SUFFIX)
 COCO_TFR9_REPO:=$(REPO_PREFIX)strickyak/tfr9$(REPO_SUFFIX)
 COCO_TURBOS_REPO:=$(REPO_PREFIX)boisy/turbos$(REPO_SUFFIX)
+COCO_CMOC_OS9_REPO:=$(REPO_PREFIX)nitros9project/cmoc_os9$(REPO_SUFFIX)
 COCO_BORGES_SAVER_REPO:=$(REPO_PREFIX)strickyak/borges-saver$(REPO_SUFFIX)
 COCO_COLLATZ_REPO:=$(REPO_PREFIX)strickyak/collatz$(REPO_SUFFIX)
 COCO_GCC6809PIC_REPO:=$(REPO_PREFIX)strickyak/gcc6809pic$(REPO_SUFFIX)
@@ -62,22 +66,23 @@ FUJINET_SPECTRANET_REPO:=$(REPO_PREFIX)FujiNetWIFI/spectranet$(REPO_SUFFIX)
 FUJINET_ATARI800_REPO:=$(REPO_PREFIX)atari800/atari800$(REPO_SUFFIX)
 
 # Configure the versions of the tarballs.
-COCO_LWTOOLS_VERSION:=lwtools-4.24
-COCO_CMOC_VERSION:=cmoc-0.1.97
+COCO_LWTOOLS_VERSION:=lwtools-4.25
+COCO_CMOC_VERSION:=cmoc-0.1.99
 COCO_GCCRETRO_VERSION:=gcc-4.6.4
-COCO_PICOSDK_VERSION:=pico-sdk-2.1.1-thin
-COCO_PICOTOOL_VERSION:=picotool-2.1.1-thin
+COCO_PICOSDK_VERSION:=pico-sdk-2.3.0
+COCO_PICOTOOL_VERSION:=picotool-2.3.0
 
 # Add the extensions found on the tarballs.
 COCO_LWTOOLS_TARBALL=$(COCO_LWTOOLS_VERSION).tar.gz
 COCO_CMOC_TARBALL=$(COCO_CMOC_VERSION).tar.gz
 COCO_GCCRETRO_TARBALL=$(COCO_GCCRETRO_VERSION).tar.bz2
-COCO_PICOSDK_TARBALL=$(COCO_PICOSDK_VERSION).tar.gz
-COCO_PICOTOOL_TARBALL=$(COCO_PICOTOOL_VERSION).tar.gz
+COCO_PICOSDK_TARBALL=$(COCO_PICOSDK_VERSION).tar.bz2
+COCO_PICOTOOL_TARBALL=$(COCO_PICOTOOL_VERSION).tar.bz2
 
 ##################################################################################
 
 # URLS for the tarballs.
+# FYI: https://github.com/raspberrypi/pico-sdk/archive/refs/tags/2.3.0.zip
 
 # Always use MIRROR for these:
 COCO_PICOSDK_URL:='$(PIZGA_MIRROR_URL)/$(COCO_PICOSDK_TARBALL)'
