@@ -101,8 +101,27 @@ make
 
 ## Re-building portions.
 
+### NitrOS-9 C libraries
+
+[nitros9-c-libs](https://github.com/nitros9project/nitros9-c-libs)
+(formerly `cmoc_os9`) provides C compiler library support for NitrOS-9
+across multiple compilers. To fetch it and build its libraries through
+the shelf, including the CMOC and LWTOOLS prerequisites, run:
+
+```sh
+make nitros9-c-libs.done
+```
+
+Use `make ANON=1 nitros9-c-libs.done` to clone without GitHub SSH access.
+The checkout is stored in `nitros9-c-libs/`. The former `cmoc_os9.got`
+and `cmoc_os9.done` targets remain available as compatibility aliases.
+The build produces `lib/libc.a`, `lib/libcf.a`, and `cgfx/libcgfx.a`
+inside that checkout; headers are in `nitros9-c-libs/include/`.
+
+### Rebuilding a package
+
 If you delete one of the `*.done` files
-( e.g. `cmoc.done frobio.done gccretro.done lwtools.done nitros9.done toolshed.done` )
+( e.g. `cmoc.done frobio.done gccretro.done lwtools.done nitros9.done nitros9-c-libs.done toolshed.done` )
 and type `make`, it will rebuild that portion of the shelf.
 
 If you delete the source directory associated with one of those portions
